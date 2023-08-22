@@ -1,11 +1,11 @@
 -- Your SQL goes 
 CREATE TABLE Users (
-    id SERIAL PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL,
+    id VARCHAR(255) PRIMARY KEY NOT NULL,
+    username VARCHAR(255) NOT NULL,
     age INT NOT NULL,
-    email TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP NOT NULL
 

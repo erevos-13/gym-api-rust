@@ -2,10 +2,11 @@
 use actix_web::{error::ResponseError, HttpResponse};
 use derive_more::Display;
 use diesel::result::{DatabaseErrorKind, Error as DBError};
+use serde::Serialize;
 use std::convert::From;
 use uuid::Error as ParseError;
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, Serialize)]
 pub enum ServiceError {
     #[display(fmt = "Internal Server Error")]
     InternalServerError,

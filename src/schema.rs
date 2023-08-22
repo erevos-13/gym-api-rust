@@ -9,12 +9,12 @@ diesel::table! {
 
 diesel::table! {
     users (id) {
-        id -> Int4,
-        username -> Text,
+        id -> Varchar,
+        username -> Varchar,
         age -> Int4,
-        email -> Text,
-        first_name -> Text,
-        last_name -> Text,
+        email -> Varchar,
+        first_name -> Varchar,
+        last_name -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

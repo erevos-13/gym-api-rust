@@ -12,7 +12,7 @@ pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 #[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable)]
 #[diesel(table_name = users)]
 pub struct User {
-    pub id: i32,
+    pub id: String,
     pub username: String,
     pub age: i32,
     pub email: String,
@@ -20,11 +20,4 @@ pub struct User {
     pub last_name: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
-}
-
-#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable)]
-#[diesel(table_name = testme)]
-pub struct Testme {
-    pub id: i32,
-    pub count: i32,
 }
