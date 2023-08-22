@@ -22,12 +22,12 @@ pub async fn register_user(
 ) -> Result<HttpResponse, actix_web::Error> {
     let uuid = uuid::Uuid::new_v4();
     let user_register_model = User {
-        id: uuid.to_string(),
+        id: 15,
         username: register_user.username.clone(),
         email: register_user.email.clone(),
+        age: register_user.age,
         first_name: register_user.first_name.clone(),
         last_name: register_user.last_name.clone(),
-        // age: register_user.age.clone(),
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
     };
@@ -45,5 +45,5 @@ fn query(user: User, conn: &mut PgConnection) -> Result<User, crate::errors::Ser
     let res: User = diesel::insert_into(users)
         .values(&user)
         .get_result::<User>(conn)?;
-    Ok(user)
+    Ok(res)
 }

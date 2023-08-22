@@ -15,5 +15,5 @@ r2d2 = "0.8.10"
 uuid = {version ="1.4.1", features = ['v4']}
 derive_more = "0.99.17"
 chrono = { version = "0.4.19", features = ["serde"] }
-diesel = { version = "2.0.4", features = ["postgres", "r2d2", "chrono"] }
+diesel = { version = "2.1.0", features = ["postgres", "r2d2", "chrono","uuid", "num-integer"] }
 serde_json = "1.0"

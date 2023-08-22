@@ -1,8 +1,8 @@
 -- Your SQL goes 
 CREATE TABLE Users (
-    id TEXT PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY NOT NULL,
     username TEXT NOT NULL,
-    -- age serial NOT NULL,
+    age INT NOT NULL,
     email TEXT NOT NULL,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,

@@ -4,7 +4,7 @@ mod models;
 mod schema;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel::{r2d2::ConnectionManager, PgConnection};
-use handlers::user_handler;
+use handlers::{test_me_handler, user_handler};
 
 #[macro_use]
 extern crate log;
@@ -26,9 +26,17 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             // limit the maximum amount of data that server will accept
             .app_data(web::JsonConfig::default().limit(4096))
-            .service(web::scope("/api").service(
-                web::resource("/register").route(web::post().to(user_handler::register_user)),
-            ))
+            .service(
+                web::scope("/api")
+                    .service(
+                        web::resource("/register")
+                            .route(web::post().to(user_handler::register_user)),
+                    )
+                    .service(
+                        web::resource("/test")
+                            .route(web::post().to(test_me_handler::test_me_import)),
+                    ),
+            )
             .route("/", web::get().to(HttpResponse::Ok))
     })
     .bind(("127.0.0.1", 8080))?
