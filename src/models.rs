@@ -21,3 +21,14 @@ pub struct User {
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
+
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable)]
+#[diesel(belongs_to(User))]
+#[diesel(table_name = password_users)]
+pub struct PasswordUsers {
+    pub id: i32,
+    pub user_id: String,
+    pub password: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
