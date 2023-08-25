@@ -23,10 +23,10 @@ pub struct User {
 }
 
 #[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable)]
-#[diesel(belongs_to(User))]
+#[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = password_users)]
 pub struct PasswordUsers {
-    pub id: i32,
+    pub id: String,
     pub user_id: String,
     pub password: String,
     pub created_at: chrono::NaiveDateTime,

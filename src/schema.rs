@@ -2,7 +2,7 @@
 
 diesel::table! {
     password_users (id) {
-        id -> Int4,
+        id -> Varchar,
         user_id -> Varchar,
         password -> Text,
         created_at -> Timestamp,

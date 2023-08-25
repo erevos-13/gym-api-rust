@@ -3,12 +3,21 @@ use chrono::Utc;
 use diesel::prelude::*;
 use lazy_static::lazy_static;
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 
-use crate::models::{PasswordUsers, Pool, User};
+use crate::{
+    models::{PasswordUsers, Pool, User},
+    schema::password_users,
+};
 lazy_static! {
     static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
+}
+
+#[derive(Deserialize, Serialize, Clone, Queryable, Debug, Validate)]
+pub struct Login {
+    pub username: String,
+    pub password: String,
 }
 #[derive(Deserialize, Clone, Queryable, Debug, Validate)]
 pub struct UserRegister {
@@ -94,7 +103,7 @@ pub async fn register_user(
 fn query(user: &User, conn: &mut PgConnection) -> Result<User, crate::errors::ServiceError> {
     use crate::schema::users::dsl::*;
     let user_fount = users
-        .select(id)
+        .select(username)
         .filter(username.eq(&user.username))
         .execute(conn)?;
     if user_fount > 0 {
@@ -116,7 +125,7 @@ fn query_password(
 ) -> Result<PasswordUsers, crate::errors::ServiceError> {
     use crate::schema::password_users::dsl::*;
     let password_user = PasswordUsers {
-        id: 0,
+        id: uuid::Uuid::new_v4().to_string(),
         user_id: user.id.clone(),
         password: password_insert,
         created_at: Utc::now().naive_utc(),
@@ -126,4 +135,35 @@ fn query_password(
         .values(password_user)
         .get_result::<PasswordUsers>(conn)?;
     Ok(res)
+}
+
+fn query_login(
+    login: Login,
+    conn: &mut PgConnection,
+) -> Result<String, crate::errors::ServiceError> {
+    use crate::schema::password_users::dsl::*;
+    use crate::schema::users::dsl::*;
+
+    let user_fount = password_users
+        .inner_join(users)
+        .filter(username.eq(&login.username))
+        .execute(conn)?;
+    dbg!(user_fount);
+    Ok("test".to_string())
+}
+pub async fn login_user(
+    login: web::Json<Login>,
+    pool: web::Data<Pool>,
+) -> Result<HttpResponse, actix_web::Error> {
+    let login_input = Login {
+        username: login.username.clone(),
+        password: login.password.clone(),
+    };
+    web::block(move || {
+        let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
+            &mut pool.get().unwrap();
+        query_login(login_input, conn)
+    })
+    .await?;
+    Ok(HttpResponse::Ok().json("test"))
 }

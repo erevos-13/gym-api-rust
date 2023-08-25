@@ -26,9 +26,16 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             // limit the maximum amount of data that server will accept
             .app_data(web::JsonConfig::default().limit(4096))
-            .service(web::scope("/api").service(
-                web::resource("/register").route(web::post().to(user_handler::register_user)),
-            ))
+            .service(
+                web::scope("/api")
+                    .service(
+                        web::resource("/register")
+                            .route(web::post().to(user_handler::register_user)),
+                    )
+                    .service(
+                        web::resource("/login").route(web::post().to(user_handler::login_user)),
+                    ),
+            )
             .route("/", web::get().to(HttpResponse::Ok))
     })
     .bind(("127.0.0.1", 8080))?
