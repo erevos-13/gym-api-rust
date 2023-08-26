@@ -25,6 +25,7 @@ fn query_login(login: Login, conn: &mut PgConnection) -> Result<User, crate::err
     let password_verify = unix::verify(login.password, &user_found[0].0.password.clone());
     if password_verify {
         dbg!(password_verify);
+        println!("User found: {:?}", user);
         Ok(user)
     } else {
         Err(crate::errors::ServiceError::BadRequest(
