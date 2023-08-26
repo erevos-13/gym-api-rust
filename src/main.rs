@@ -4,7 +4,7 @@ mod models;
 mod schema;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel::{r2d2::ConnectionManager, PgConnection};
-use handlers::user_handler;
+use handlers::{login_handler, user_handler};
 
 #[macro_use]
 extern crate log;
@@ -33,7 +33,7 @@ async fn main() -> std::io::Result<()> {
                             .route(web::post().to(user_handler::register_user)),
                     )
                     .service(
-                        web::resource("/login").route(web::post().to(user_handler::login_user)),
+                        web::resource("/login").route(web::post().to(login_handler::login_user)),
                     ),
             )
             .route("/", web::get().to(HttpResponse::Ok))

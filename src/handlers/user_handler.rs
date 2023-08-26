@@ -2,26 +2,17 @@ use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use diesel::prelude::*;
 use lazy_static::lazy_static;
-use password_hash::PasswordHash;
 use pwhash::bcrypt;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use validator::{Validate, ValidationError};
 
-use crate::{
-    models::{PasswordUsers, Pool, User},
-    schema::password_users,
-};
+use crate::models::{PasswordUsers, Pool, User};
 lazy_static! {
     static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
 }
 const HASH_STRING: &str = "$scrypt$v=19$m=65536,t=1,p=1$c29tZXNhbHQAAAAAAAAAAA$+r0d29hqEB0yasKr55ZgICsQGSkl0v0kgwhd+U3wyRo";
 
-#[derive(Deserialize, Serialize, Clone, Queryable, Debug, Validate)]
-pub struct Login {
-    pub username: String,
-    pub password: String,
-}
 #[derive(Deserialize, Clone, Queryable, Debug, Validate)]
 pub struct UserRegister {
     pub username: String,
@@ -142,35 +133,4 @@ fn query_password(
         .values(password_user)
         .get_result::<PasswordUsers>(conn)?;
     Ok(res)
-}
-
-fn query_login(
-    login: Login,
-    conn: &mut PgConnection,
-) -> Result<String, crate::errors::ServiceError> {
-    use crate::schema::password_users::dsl::*;
-    use crate::schema::users::dsl::*;
-
-    let user_fount = password_users
-        .inner_join(users)
-        .filter(username.eq(&login.username))
-        .execute(conn)?;
-    dbg!(user_fount);
-    Ok("test".to_string())
-}
-pub async fn login_user(
-    login: web::Json<Login>,
-    pool: web::Data<Pool>,
-) -> Result<HttpResponse, actix_web::Error> {
-    let login_input = Login {
-        username: login.username.clone(),
-        password: login.password.clone(),
-    };
-    web::block(move || {
-        let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
-            &mut pool.get().unwrap();
-        query_login(login_input, conn)
-    })
-    .await?;
-    Ok(HttpResponse::Ok().json("test"))
 }
