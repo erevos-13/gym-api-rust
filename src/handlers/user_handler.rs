@@ -2,6 +2,8 @@ use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use diesel::prelude::*;
 use lazy_static::lazy_static;
+use password_hash::PasswordHash;
+use pwhash::bcrypt;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
@@ -13,6 +15,7 @@ use crate::{
 lazy_static! {
     static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
 }
+const HASH_STRING: &str = "$scrypt$v=19$m=65536,t=1,p=1$c29tZXNhbHQAAAAAAAAAAA$+r0d29hqEB0yasKr55ZgICsQGSkl0v0kgwhd+U3wyRo";
 
 #[derive(Deserialize, Serialize, Clone, Queryable, Debug, Validate)]
 pub struct Login {
@@ -84,6 +87,7 @@ pub async fn register_user(
             &mut pool.get().unwrap();
         match query(&user_register_model, conn) {
             Ok(user) => {
+                debug!("User created: {:?}", user);
                 match query_password(&user_register_model, register_user.password.clone(), conn) {
                     Ok(_) => Ok(user),
                     Err(e) => Err(e),
@@ -106,16 +110,17 @@ fn query(user: &User, conn: &mut PgConnection) -> Result<User, crate::errors::Se
         .select(username)
         .filter(username.eq(&user.username))
         .execute(conn)?;
-    if user_fount > 0 {
-        return Err(crate::errors::ServiceError::BadRequest(
-            "User already exists".into(),
-        ));
+    dbg!(user_fount);
+    if user_fount == 0 {
+        let res: User = diesel::insert_into(users)
+            .values(user)
+            .get_result::<User>(conn)?;
+        return Ok(res);
     }
-
-    let res: User = diesel::insert_into(users)
-        .values(user)
-        .get_result::<User>(conn)?;
-    Ok(res)
+    debug!("User already exists: {:?}", user);
+    return Err(crate::errors::ServiceError::BadRequest(
+        "User already exists".into(),
+    ));
 }
 
 fn query_password(
@@ -124,10 +129,12 @@ fn query_password(
     conn: &mut PgConnection,
 ) -> Result<PasswordUsers, crate::errors::ServiceError> {
     use crate::schema::password_users::dsl::*;
+    let h_new = bcrypt::hash(password_insert).unwrap();
+
     let password_user = PasswordUsers {
         id: uuid::Uuid::new_v4().to_string(),
         user_id: user.id.clone(),
-        password: password_insert,
+        password: h_new,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
     };
