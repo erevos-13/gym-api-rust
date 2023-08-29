@@ -1,4 +1,7 @@
-use crate::models::{PasswordUsers, Pool, User};
+use crate::{
+    models::{PasswordUsers, Pool, User},
+    token::signing,
+};
 use actix_web::{web, HttpResponse};
 use diesel::prelude::*;
 use pwhash::{bcrypt, unix};
@@ -11,7 +14,10 @@ pub struct Login {
     pub password: String,
 }
 
-fn query_login(login: Login, conn: &mut PgConnection) -> Result<User, crate::errors::ServiceError> {
+fn query_login(
+    login: Login,
+    conn: &mut PgConnection,
+) -> Result<String, crate::errors::ServiceError> {
     use crate::schema::password_users::dsl::*;
     use crate::schema::users::dsl::*;
 
@@ -24,9 +30,12 @@ fn query_login(login: Login, conn: &mut PgConnection) -> Result<User, crate::err
     dbg!(user_found[0].0.password.clone());
     let password_verify = unix::verify(login.password, &user_found[0].0.password.clone());
     if password_verify {
-        dbg!(password_verify);
         println!("User found: {:?}", user);
-        Ok(user)
+        let token = match signing(user.id, user.username) {
+            Ok(token) => token,
+            Err(e) => return Err(crate::errors::ServiceError::BadRequest(e.to_string())),
+        };
+        Ok(token)
     } else {
         Err(crate::errors::ServiceError::BadRequest(
             "Authentication fail".to_string(),

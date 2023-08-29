@@ -23,3 +23,6 @@ lazy_static = "1.4.0"
 regex = "1.9.3"
 password-hash = "0.5.0"
 pwhash = "1.0.0"
+jwt = {version ="0.16.0", features = ['openssl']}
+hmac = "0.12.1"
+sha2 = "0.10.7"

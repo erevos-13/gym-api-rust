@@ -2,6 +2,7 @@ mod errors;
 mod handlers;
 mod models;
 mod schema;
+mod token;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use diesel::{r2d2::ConnectionManager, PgConnection};
 use handlers::{login_handler, user_handler};
