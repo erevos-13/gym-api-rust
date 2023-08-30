@@ -31,7 +31,7 @@ fn query_login(
     let password_verify = unix::verify(login.password, &user_found[0].0.password.clone());
     if password_verify {
         println!("User found: {:?}", user);
-        let token = match signing(user.id, user.username) {
+        let token = match signing(user.id) {
             Ok(token) => token,
             Err(e) => return Err(crate::errors::ServiceError::BadRequest(e.to_string())),
         };

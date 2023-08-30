@@ -18,6 +18,7 @@ pub struct User {
     pub email: String,
     pub first_name: String,
     pub last_name: String,
+    pub role: i32,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }

@@ -25,6 +25,7 @@ diesel::table! {
         email -> Varchar,
         first_name -> Varchar,
         last_name -> Varchar,
+        role -> Int4,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

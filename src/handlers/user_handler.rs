@@ -7,7 +7,10 @@ use regex::Regex;
 use serde::Deserialize;
 use validator::{Validate, ValidationError};
 
-use crate::models::{PasswordUsers, Pool, User};
+use crate::{
+    models::{PasswordUsers, Pool, User},
+    token::Role,
+};
 lazy_static! {
     static ref RE_SPECIAL_CHAR: Regex = Regex::new("^.*?[@$!%*?&].*$").unwrap();
 }
@@ -70,6 +73,7 @@ pub async fn register_user(
         age: register_user.age,
         first_name: register_user.first_name.clone(),
         last_name: register_user.last_name.clone(),
+        role: Role::User as i32,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
     };
