@@ -30,15 +30,15 @@ fn query_login(
             "Authentication fail".to_string(),
         ));
     }
-
-    let user_found = password_users::inner_join(password_users, users)
-        .filter(username.eq(login.username))
-        .load::<(crate::models::PasswordUsers, crate::models::User)>(conn)
+    let user_filter = users::filter(users, username.eq(login.username.clone()))
+        .load::<User>(conn)
         .expect("Error loading users");
+    let password_of_user: PasswordUsers =
+        password_users::filter(password_users, user_id.eq(user_filter[0].id.clone()))
+            .get_result(conn)?;
 
-    let user = user_found[0].1.clone();
-    dbg!(user_found[0].0.password.clone());
-    let password_verify = unix::verify(login.password, &user_found[0].0.password.clone());
+    let user = user_filter[0].clone();
+    let password_verify = unix::verify(login.password, &password_of_user.password.clone());
     if password_verify {
         println!("User found: {:?}", user);
         let token = match signing(user.id) {
