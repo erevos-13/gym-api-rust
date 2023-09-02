@@ -1,9 +1,10 @@
 use crate::{
+    errors::ServiceError,
     models::{PasswordUsers, Pool, User},
     token::signing,
 };
 use actix_web::{web, HttpResponse};
-use diesel::prelude::*;
+use diesel::{dsl::exists, prelude::*, select};
 use pwhash::{bcrypt, unix};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
@@ -20,6 +21,15 @@ fn query_login(
 ) -> Result<String, crate::errors::ServiceError> {
     use crate::schema::password_users::dsl::*;
     use crate::schema::users::dsl::*;
+    let user_exist = select(exists(users.filter(username.eq(login.username.clone()))))
+        .get_result::<bool>(conn)
+        .expect("Error loading users");
+
+    if !user_exist {
+        return Err(crate::errors::ServiceError::BadRequest(
+            "Authentication fail".to_string(),
+        ));
+    }
 
     let user_found = password_users::inner_join(password_users, users)
         .filter(username.eq(login.username))

@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 // type alias to use in multiple places
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone)]
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, PartialEq)]
 #[diesel(table_name = users)]
 pub struct User {
     pub id: String,
