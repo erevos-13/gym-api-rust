@@ -1,2 +1,2 @@
-pub mod login_handler;
-pub mod user_handler;
+pub mod gym;
+pub mod users;

@@ -1,11 +1,19 @@
 mod errors;
 mod handlers;
+mod jwt_auth;
 mod models;
 mod schema;
 mod token;
-use actix_web::{middleware, web, App, HttpResponse, HttpServer};
+use actix_cors::Cors;
+use actix_web::{
+    dev::ServiceRequest, http::header, middleware, web, App, HttpResponse, HttpServer,
+};
 use diesel::{r2d2::ConnectionManager, PgConnection};
-use handlers::{login_handler, user_handler};
+
+use crate::handlers::{
+    gym::create_gym,
+    users::{login_handler, user_handler},
+};
 
 #[macro_use]
 extern crate log;
@@ -22,8 +30,18 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to create pool.");
     info!("Starting server at http://127.0.0.1 and port: 8080");
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![
+                header::CONTENT_TYPE,
+                header::AUTHORIZATION,
+                header::ACCEPT,
+            ])
+            .supports_credentials();
         App::new()
             .app_data(web::Data::new(pool.clone()))
+            .wrap(cors)
             .wrap(middleware::Logger::default())
             // limit the maximum amount of data that server will accept
             .app_data(web::JsonConfig::default().limit(4096))
@@ -35,7 +53,8 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::resource("/login").route(web::post().to(login_handler::login_user)),
-                    ),
+                    )
+                    .service(web::resource("/gym").route(web::post().to(create_gym::create_gym))),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })

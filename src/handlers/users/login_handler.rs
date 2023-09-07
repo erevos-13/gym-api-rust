@@ -15,6 +15,11 @@ pub struct Login {
     pub password: String,
 }
 
+#[derive(Serialize)]
+struct TokenResponse {
+    token: String,
+}
+
 fn query_login(
     login: Login,
     conn: &mut PgConnection,
@@ -67,5 +72,11 @@ pub async fn login_user(
         query_login(login_input, conn)
     })
     .await?;
-    Ok(HttpResponse::Ok().json(result))
+    match result {
+        Ok(token) => {
+            let token_response = TokenResponse { token };
+            return Ok(HttpResponse::Ok().json(token_response));
+        }
+        Err(e) => return Err(actix_web::error::ErrorBadRequest(e)),
+    };
 }

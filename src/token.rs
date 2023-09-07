@@ -3,6 +3,7 @@ use core::fmt;
 use chrono::Utc;
 use hmac::{Hmac, Mac};
 use jsonwebtoken::errors::ErrorKind;
+use jsonwebtoken::{decode_header, TokenData};
 
 use jsonwebtoken::{
     decode, encode, errors::Error, Algorithm, DecodingKey, EncodingKey, Header, Validation,
@@ -34,11 +35,11 @@ impl fmt::Display for Role {
 }
 /// Our claims struct, it needs to derive `Serialize` and/or `Deserialize`
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
-    gym: String,
-    exp: usize,
-    role: u8,
+pub struct Claims {
+    pub sub: String,
+    pub gym: String,
+    pub exp: usize,
+    pub role: u8,
 }
 
 pub fn signing(uid: String) -> Result<String, String> {
@@ -62,4 +63,12 @@ pub fn signing(uid: String) -> Result<String, String> {
         Err(_) => "error".to_string(),
     };
     Ok(token)
+}
+
+pub fn decode_token(token: String) -> Result<TokenData<Claims>, jsonwebtoken::errors::Error> {
+    decode::<Claims>(
+        &token,
+        &DecodingKey::from_secret(TOP_SECRET),
+        &Validation::default(),
+    )
 }
