@@ -105,14 +105,12 @@ fn query(user: &User, conn: &mut PgConnection) -> Result<User, crate::errors::Se
         .select(username)
         .filter(username.eq(&user.username))
         .execute(conn)?;
-    dbg!(user_fount);
     if user_fount == 0 {
         let res: User = diesel::insert_into(users)
             .values(user)
             .get_result::<User>(conn)?;
         return Ok(res);
     }
-    debug!("User already exists: {:?}", user);
     return Err(crate::errors::ServiceError::BadRequest(
         "User already exists".into(),
     ));
