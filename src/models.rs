@@ -75,3 +75,24 @@ pub struct Gym {
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
+
+#[derive(
+    Debug,
+    Insertable,
+    QueryableByName,
+    Queryable,
+    Serialize,
+    Selectable,
+    Identifiable,
+    Clone,
+    Deserialize,
+)]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(table_name = activities)]
+pub struct Activities {
+    pub id: String,
+    pub name: String,
+    pub gym_id: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}

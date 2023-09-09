@@ -5,6 +5,7 @@ mod jwt_auth;
 mod models;
 mod schema;
 mod token;
+
 use actix_cors::Cors;
 use actix_web::{
     dev::ServiceRequest, http::header, middleware, web, App, HttpResponse, HttpServer,
@@ -12,6 +13,7 @@ use actix_web::{
 use diesel::{r2d2::ConnectionManager, PgConnection};
 
 use crate::handlers::{
+    activities::*,
     gym::*,
     users::{login_handler, user_handler},
 };
@@ -58,7 +60,8 @@ async fn main() -> std::io::Result<()> {
                     .service(create_gym::create_gym)
                     .service(update_gym::update_gym)
                     .service(get_gym::get_gym)
-                    .service(delete_gym::delete_gym),
+                    .service(delete_gym::delete_gym)
+                    .service(create_activity::create_activity),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })

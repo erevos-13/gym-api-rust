@@ -1,6 +1,16 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    activities (id) {
+        id -> Varchar,
+        name -> Text,
+        gym_id -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     gym (id) {
         id -> Varchar,
         name -> Text,
@@ -47,6 +57,7 @@ diesel::joinable!(gym -> users (user_id));
 diesel::joinable!(password_users -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    activities,
     gym,
     password_users,
     testme,
