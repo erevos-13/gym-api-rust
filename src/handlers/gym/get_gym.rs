@@ -6,7 +6,7 @@ use crate::{
 use actix_web::{get, HttpMessage};
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::Utc;
-use diesel::{prelude::*, sql_types::Uuid};
+use diesel::prelude::*;
 
 #[get("/gym")]
 pub async fn get_gym(
@@ -16,6 +16,7 @@ pub async fn get_gym(
 ) -> Result<HttpResponse, actix_web::Error> {
     let ext = req.extensions();
     let user_id = ext.get::<uuid::Uuid>().unwrap().clone();
+    info!("Get gym with user_id: {:?}", &user_id);
     let result = web::block(move || {
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
@@ -37,11 +38,16 @@ pub async fn get_gym(
 }
 
 fn query(
-    user_id: uuid::Uuid,
+    _id: uuid::Uuid,
     conn: &mut PgConnection,
 ) -> Result<Vec<Gym>, crate::errors::ServiceError> {
     use crate::schema::gym::dsl::*;
-    let gyms_found = gym.filter(user_id.eq(&user_id)).load::<Gym>(conn);
+
+    let gyms_found = gym
+        .select(gym::all_columns())
+        .filter(user_id.eq(&_id.to_string()))
+        .load::<Gym>(conn);
+    info!("Gyms found: {:?}", gyms_found);
     match gyms_found {
         Ok(gyms) => Ok(gyms),
         Err(e) => Err(crate::errors::ServiceError::BadRequest(e.to_string())),
