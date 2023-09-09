@@ -41,15 +41,9 @@ fn query(
     conn: &mut PgConnection,
 ) -> Result<Vec<Gym>, crate::errors::ServiceError> {
     use crate::schema::gym::dsl::*;
-    let gym_found = gym
-        .select(user_id)
-        .filter(user_id.eq(&user_id))
-        .execute(conn)?;
-    if gym_found >= 1 {
-        let res: Vec<Gym> = gym.filter(user_id.eq(&user_id)).load::<Gym>(conn)?;
-        return Ok(res);
+    let gyms_found = gym.filter(user_id.eq(&user_id)).load::<Gym>(conn);
+    match gyms_found {
+        Ok(gyms) => Ok(gyms),
+        Err(e) => Err(crate::errors::ServiceError::BadRequest(e.to_string())),
     }
-    return Err(crate::errors::ServiceError::BadRequest(
-        "Gym does'n exists".to_string(),
-    ));
 }
