@@ -16,6 +16,9 @@ pub enum ServiceError {
 
     #[display(fmt = "Unauthorized")]
     Unauthorized,
+
+    #[display(fmt = "AlreadyExists: {}", _0)]
+    AlreadyExists(String),
 }
 
 // impl ResponseError trait allows to convert our errors into http responses with appropriate data
@@ -27,6 +30,7 @@ impl ResponseError for ServiceError {
             }
             ServiceError::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
             ServiceError::Unauthorized => HttpResponse::Unauthorized().json("Unauthorized"),
+            ServiceError::AlreadyExists(ref message) => HttpResponse::BadRequest().json(message),
         }
     }
 }

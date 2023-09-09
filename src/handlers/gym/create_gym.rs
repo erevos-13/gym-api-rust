@@ -1,20 +1,13 @@
 use crate::{
+    input_model::gym_input_model::GymRegister,
     jwt_auth,
     models::{Gym, Pool},
 };
-use actix_web::HttpMessage;
+use actix_web::{post, HttpMessage};
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::Utc;
-use diesel::{expression, prelude::*};
-use serde::Deserialize;
-use validator::Validate;
-#[derive(Deserialize, Clone, Queryable, Debug, Validate)]
-pub struct GymRegister {
-    pub name: String,
-    pub address: String,
-    pub postal_code: i32,
-}
-
+use diesel::prelude::*;
+#[post("/gym")]
 pub async fn create_gym(
     req: HttpRequest,
     gym_register: web::Json<GymRegister>,
@@ -33,18 +26,17 @@ pub async fn create_gym(
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
     };
-    web::block(move || {
+    let result = web::block(move || {
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
-        match query(&gym_new, conn) {
-            Ok(gym) => HttpResponse::Ok().json(gym),
-            Err(e) => {
-                println!("Error: {:?}", e);
-                Err(e)
-            }
-        }
+        query(&gym_new, conn)
     })
-    .await?
+    .await
+    .map_err(actix_web::error::ErrorInternalServerError)?;
+    match result {
+        Ok(gym) => Ok(HttpResponse::Ok().json(gym)),
+        Err(e) => Err(actix_web::error::ErrorBadRequest(e.to_string())),
+    }
 }
 
 fn query(gym_create: &Gym, conn: &mut PgConnection) -> Result<Gym, crate::errors::ServiceError> {
@@ -59,7 +51,7 @@ fn query(gym_create: &Gym, conn: &mut PgConnection) -> Result<Gym, crate::errors
             .get_result::<Gym>(conn)?;
         return Ok(res);
     }
-    return Err(crate::errors::ServiceError::BadRequest(
+    return Err(crate::errors::ServiceError::AlreadyExists(
         "Gym already exists".to_string(),
     ));
 }

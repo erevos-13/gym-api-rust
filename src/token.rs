@@ -44,7 +44,7 @@ pub struct Claims {
 
 pub fn signing(uid: String) -> Result<String, String> {
     let expiration = Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(60))
+        .checked_add_signed(chrono::Duration::minutes(60))
         .expect("valid timestamp")
         .timestamp();
 

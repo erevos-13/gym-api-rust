@@ -34,7 +34,7 @@ pub struct PasswordUsers {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable)]
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = gym)]
 pub struct Gym {

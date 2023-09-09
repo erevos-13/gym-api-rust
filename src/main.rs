@@ -1,5 +1,6 @@
 mod errors;
 mod handlers;
+mod input_model;
 mod jwt_auth;
 mod models;
 mod schema;
@@ -11,7 +12,7 @@ use actix_web::{
 use diesel::{r2d2::ConnectionManager, PgConnection};
 
 use crate::handlers::{
-    gym::create_gym,
+    gym::*,
     users::{login_handler, user_handler},
 };
 
@@ -54,7 +55,9 @@ async fn main() -> std::io::Result<()> {
                     .service(
                         web::resource("/login").route(web::post().to(login_handler::login_user)),
                     )
-                    .service(web::resource("/gym").route(web::post().to(create_gym::create_gym))),
+                    .service(create_gym::create_gym)
+                    .service(update_gym::update_gym)
+                    .service(get_gym::get_gym),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })
