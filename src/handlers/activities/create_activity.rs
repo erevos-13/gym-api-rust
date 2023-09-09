@@ -9,7 +9,7 @@ use crate::{
 };
 use actix_web::{post, HttpMessage};
 use actix_web::{web, HttpRequest, HttpResponse};
-use diesel::{associations::HasTable, prelude::*};
+use diesel::prelude::*;
 
 #[post("/activities")]
 pub async fn create_activity(
@@ -44,6 +44,16 @@ fn query(
     conn: &mut PgConnection,
 ) -> Result<Activities, crate::errors::ServiceError> {
     use crate::schema::activities::dsl::*;
+    let same_name_activity_exist = activities
+        .select(id)
+        .filter(name.eq(&activity.name))
+        .filter(gym_id.eq(&activity.gym_id))
+        .execute(conn)?;
+    if same_name_activity_exist > 0 {
+        return Err(crate::errors::ServiceError::BadRequest(
+            "Activity name already exist".to_string(),
+        ));
+    }
     let gym_exist_on_user = query_find_exist_gym(&activity, user_has_id.to_string(), conn)?;
     debug!("gym_exist_on_user: {:?}", gym_exist_on_user);
     if !gym_exist_on_user {

@@ -61,7 +61,9 @@ async fn main() -> std::io::Result<()> {
                     .service(update_gym::update_gym)
                     .service(get_gym::get_gym)
                     .service(delete_gym::delete_gym)
-                    .service(create_activity::create_activity),
+                    .service(create_activity::create_activity)
+                    .service(update_activity::update_activity)
+                    .service(get_activities::get_activities),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })
