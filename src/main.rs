@@ -5,6 +5,7 @@ mod jwt_auth;
 mod models;
 mod schema;
 mod token;
+mod utils;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -66,7 +67,8 @@ async fn main() -> std::io::Result<()> {
                     .service(update_activity::update_activity)
                     .service(get_activities::get_activities)
                     .service(delete_activities::delete_activity)
-                    .service(create_slots::create_slots),
+                    .service(create_slots::create_slots)
+                    .service(update_slots::update_slots),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })
