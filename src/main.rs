@@ -15,6 +15,7 @@ use diesel::{r2d2::ConnectionManager, PgConnection};
 use crate::handlers::{
     activities::*,
     gym::*,
+    slots::*,
     users::{login_handler, user_handler},
 };
 
@@ -64,7 +65,8 @@ async fn main() -> std::io::Result<()> {
                     .service(create_activity::create_activity)
                     .service(update_activity::update_activity)
                     .service(get_activities::get_activities)
-                    .service(delete_activities::delete_activity),
+                    .service(delete_activities::delete_activity)
+                    .service(create_slots::create_slots),
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })

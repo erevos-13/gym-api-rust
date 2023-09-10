@@ -87,12 +87,24 @@ pub struct Gym {
     Clone,
     Deserialize,
 )]
-#[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = activities)]
 pub struct Activities {
     pub id: String,
     pub name: String,
     pub gym_id: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize)]
+#[diesel(table_name = slots)]
+pub struct Slots {
+    pub id: String,
+    pub start_time: chrono::NaiveDateTime,
+    pub end_time: chrono::NaiveDateTime,
+    pub attendants: i32,
+    pub gym_id: String,
+    pub activity_id: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }

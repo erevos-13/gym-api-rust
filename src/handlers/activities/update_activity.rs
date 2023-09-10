@@ -2,10 +2,7 @@ use crate::{
     input_model::{activities_models::ActivityInput, gym_input_model::GymRegister},
     jwt_auth,
     models::{Activities, Gym, Pool},
-    schema::{
-        activities::{self, *},
-        gym::*,
-    },
+    schema::activities::{self, *},
 };
 use actix_web::{patch, HttpMessage};
 use actix_web::{web, HttpRequest, HttpResponse};

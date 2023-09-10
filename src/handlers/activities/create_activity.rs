@@ -54,7 +54,7 @@ fn query(
             "Activity name already exist".to_string(),
         ));
     }
-    let gym_exist_on_user = query_find_exist_gym(&activity, user_has_id.to_string(), conn)?;
+    let gym_exist_on_user = query_find_exist_gym(&activity, conn)?;
     debug!("gym_exist_on_user: {:?}", gym_exist_on_user);
     if !gym_exist_on_user {
         return Err(crate::errors::ServiceError::BadRequest(
@@ -79,14 +79,12 @@ fn query(
 
 fn query_find_exist_gym(
     activity: &ActivityInput,
-    user_has_id: String,
     conn: &mut PgConnection,
 ) -> Result<bool, crate::errors::ServiceError> {
     use crate::schema::gym::dsl::*;
     let gym_exist_on_user = gym
         .select(id)
         .filter(id.eq(&activity.gym_id))
-        .filter(user_id.eq(&user_has_id))
         .execute(conn)?;
 
     match gym_exist_on_user {

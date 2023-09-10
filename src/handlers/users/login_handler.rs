@@ -1,6 +1,7 @@
 use crate::{
     errors::ServiceError,
-    models::{PasswordUsers, Pool, User},
+    models::{Gym, PasswordUsers, Pool, User},
+    schema::gym,
     token::signing,
 };
 use actix_web::{web, HttpResponse};
@@ -45,8 +46,9 @@ fn query_login(
     let user = user_filter[0].clone();
     let password_verify = unix::verify(login.password, &password_of_user.password.clone());
     if password_verify {
-        println!("User found: {:?}", user);
-        let token = match signing(user.id) {
+        info!("User found: {:?}", user);
+        let gym_by_user = find_gym_by_user(user.id.clone(), conn)?;
+        let token = match signing(user.id, gym_by_user) {
             Ok(token) => token,
             Err(e) => return Err(crate::errors::ServiceError::BadRequest(e.to_string())),
         };
@@ -79,4 +81,15 @@ pub async fn login_user(
         }
         Err(e) => return Err(actix_web::error::ErrorBadRequest(e)),
     };
+}
+
+fn find_gym_by_user(
+    user_id: String,
+    conn: &mut PgConnection,
+) -> Result<String, crate::errors::ServiceError> {
+    use crate::schema::gym::dsl::*;
+    let gym_by_user = gym::filter(gym, user_id.eq(user_id.clone()))
+        .load::<Gym>(conn)
+        .expect("Error loading gym");
+    Ok(gym_by_user[0].id.clone())
 }

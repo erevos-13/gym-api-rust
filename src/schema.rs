@@ -33,6 +33,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    slots (id) {
+        id -> Varchar,
+        start_time -> Timestamp,
+        end_time -> Timestamp,
+        attendants -> Int4,
+        gym_id -> Varchar,
+        activity_id -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     testme (id) {
         id -> Int4,
         count -> Int4,
@@ -55,11 +68,14 @@ diesel::table! {
 
 diesel::joinable!(gym -> users (user_id));
 diesel::joinable!(password_users -> users (user_id));
+diesel::joinable!(slots -> activities (activity_id));
+diesel::joinable!(slots -> gym (gym_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     activities,
     gym,
     password_users,
+    slots,
     testme,
     users,
 );
