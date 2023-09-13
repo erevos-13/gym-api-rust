@@ -42,6 +42,7 @@ fn query_find_and_remove_attendant_slot(
     conn: &mut PgConnection,
 ) -> Result<bool, crate::errors::ServiceError> {
     use crate::schema::slots::dsl::*;
+
     let attendants_found = slots
         .filter(id.eq(slot_id.clone()))
         .limit(1)
