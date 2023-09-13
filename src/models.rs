@@ -96,7 +96,17 @@ pub struct Activities {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize)]
+#[derive(
+    Debug,
+    Insertable,
+    Queryable,
+    Serialize,
+    Selectable,
+    Identifiable,
+    Clone,
+    Deserialize,
+    AsChangeset,
+)]
 #[diesel(table_name = slots)]
 pub struct Slots {
     pub id: String,
@@ -105,6 +115,19 @@ pub struct Slots {
     pub attendants: i32,
     pub gym_id: String,
     pub activity_id: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize)]
+#[diesel(table_name = appointments)]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(belongs_to(Slots, foreign_key = slot_id))]
+pub struct Appointments {
+    pub id: String,
+    pub slot_id: String,
+    pub gym_id: String,
+    pub user_id: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }

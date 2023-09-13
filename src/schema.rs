@@ -11,6 +11,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    appointments (id) {
+        id -> Varchar,
+        slot_id -> Varchar,
+        gym_id -> Varchar,
+        user_id -> Varchar,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     gym (id) {
         id -> Varchar,
         name -> Text,
@@ -66,6 +77,9 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(appointments -> gym (gym_id));
+diesel::joinable!(appointments -> slots (slot_id));
+diesel::joinable!(appointments -> users (user_id));
 diesel::joinable!(gym -> users (user_id));
 diesel::joinable!(password_users -> users (user_id));
 diesel::joinable!(slots -> activities (activity_id));
@@ -73,6 +87,7 @@ diesel::joinable!(slots -> gym (gym_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     activities,
+    appointments,
     gym,
     password_users,
     slots,

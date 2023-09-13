@@ -1,5 +1,5 @@
 use crate::{
-    input_model::gym_input_model::{GymRegister, GymsDTO},
+    input_model::gym_input_model::{GymRegister, ResponseDTO},
     jwt_auth,
     models::{Gym, Pool},
 };
@@ -27,8 +27,8 @@ pub async fn get_gym(
     match result {
         Ok(gyms) => {
             let total = gyms.len();
-            let gyms_dto = GymsDTO {
-                gyms: gyms,
+            let gyms_dto = ResponseDTO {
+                data: gyms,
                 total: total,
             };
             Ok(HttpResponse::Ok().json(gyms_dto))

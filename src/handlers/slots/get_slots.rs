@@ -2,6 +2,7 @@ use actix_web::{get, web, HttpRequest, HttpResponse};
 use diesel::prelude::*;
 
 use crate::{
+    input_model::gym_input_model::ResponseDTO,
     jwt_auth,
     models::{Pool, Slots},
 };
@@ -24,8 +25,13 @@ pub async fn get_slots(
     }
 }
 
-fn query(conn: &mut PgConnection) -> Result<Vec<Slots>, crate::errors::ServiceError> {
+fn query(conn: &mut PgConnection) -> Result<ResponseDTO<Slots>, crate::errors::ServiceError> {
     use crate::schema::slots::dsl::*;
     let res = slots.load::<Slots>(conn)?;
-    Ok(res)
+    let total_Count = slots.count().get_result::<i64>(conn)?;
+
+    Ok(ResponseDTO {
+        data: res,
+        total: total_Count as usize,
+    })
 }
