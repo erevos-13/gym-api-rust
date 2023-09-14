@@ -1,13 +1,6 @@
 use crate::schema::*;
 use chrono::{DateTime, Utc};
-use diesel::{
-    deserialize::FromSql,
-    pg::Pg,
-    r2d2::ConnectionManager,
-    sql_types::{BigInt, Text},
-    AsChangeset, FromSqlRow, Identifiable, Insertable, PgConnection, Queryable, QueryableByName,
-    Selectable,
-};
+use diesel::{deserialize::FromSql, pg::Pg, r2d2::ConnectionManager, sql_types::{BigInt, Text}, AsChangeset, FromSqlRow, Identifiable, Insertable, PgConnection, Queryable, QueryableByName, Selectable, Associations};
 use serde::{Deserialize, Serialize};
 
 // type alias to use in multiple places
@@ -106,6 +99,7 @@ pub struct Activities {
     Clone,
     Deserialize,
     AsChangeset,
+    PartialEq
 )]
 #[diesel(table_name = slots)]
 pub struct Slots {
@@ -119,7 +113,7 @@ pub struct Slots {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize)]
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize, PartialEq,Associations)]
 #[diesel(table_name = appointments)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(belongs_to(Slots, foreign_key = slot_id))]
