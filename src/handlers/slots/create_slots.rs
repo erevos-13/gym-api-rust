@@ -1,15 +1,13 @@
 use crate::{
     input_model::slots_models::SlotsInput,
-    jwt_auth::{self, JwtMiddleware},
-    models::{Gym, Pool, Slots},
+    jwt_auth::{self},
+    models::{ Pool, Slots},
     utils::dates::convert_date,
 };
-use actix_web::{post, web, HttpMessage, HttpRequest, HttpResponse};
+use actix_web::{post, web, HttpRequest, HttpResponse};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::PgConnection;
-use crate::models::UsersGyms;
-use crate::schema::password_users::user_id;
 use crate::schema::users_gym::dsl::users_gym;
 
 #[post("/slots")]
@@ -38,7 +36,7 @@ fn query(
     slot: Vec<SlotsInput>,
     id_user: String,
     conn: &mut PgConnection,
-) -> Result<Slots, crate::errors::ServiceError> {
+) -> Result<Vec<Slots>, crate::errors::ServiceError> {
     use crate::schema::slots::dsl::*;
     let start_date_vec = get_start_date(&slot);
     let end_date_vec = get_end_time_date(&slot);
@@ -67,7 +65,7 @@ fn query(
     let slots_vec = create_slot_from_array(slot, gym_user_id);
     let res = diesel::insert_into(slots)
         .values(&slots_vec)
-        .get_result(conn)?;
+        .get_results::<Slots>(conn)?;
     Ok(res)
 }
 

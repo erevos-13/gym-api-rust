@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use crate::models::Slots;
 use crate::utils::dates::convert_date;
 use crate::{input_model::slots_models::SlotsInput, jwt_auth, models::Pool};

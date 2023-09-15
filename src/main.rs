@@ -9,7 +9,7 @@ mod utils;
 
 use actix_cors::Cors;
 use actix_web::{
-    dev::ServiceRequest, http::header, middleware, web, App, HttpResponse, HttpServer,
+    http::header, middleware, web, App, HttpResponse, HttpServer,
 };
 use diesel::{r2d2::ConnectionManager, PgConnection};
 
@@ -18,7 +18,7 @@ use crate::handlers::{
     appointments::*,
     gym::*,
     slots::*,
-    users::{login_handler, user_handler},
+    users::*,
 };
 
 #[macro_use]
@@ -74,7 +74,8 @@ async fn main() -> std::io::Result<()> {
                     .service(get_slots::get_slots)
                     .service(create_appointments::create_appointments)
                     .service(get_appointments::get_appointments)
-                    .service(get_appoitments_by_user::get_appointments_by_user),
+                    .service(get_appoitments_by_user::get_appointments_by_user)
+                    .service(add_user_in_gym::add_user_in_gym)
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })

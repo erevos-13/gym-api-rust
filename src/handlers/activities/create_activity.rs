@@ -1,9 +1,9 @@
 use crate::{
-    input_model::{activities_models::ActivityInput, gym_input_model::GymRegister},
+    input_model::{activities_models::ActivityInput},
     jwt_auth,
-    models::{Activities, Gym, Pool},
+    models::{Activities, Pool},
     schema::{
-        activities::{self, *},
+        activities::*,
         gym::*,
     },
 };

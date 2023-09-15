@@ -16,7 +16,6 @@ pub async fn get_appointments(
             &mut pool.get().unwrap();
         query_appointments(
             jwt.user_id.to_string(),
-            jwt.user_id.to_string(),
             conn,
         )
     }).await?;
@@ -27,9 +26,17 @@ pub async fn get_appointments(
     }
 }
 
-fn query_appointments(gym_user_id:String,user_id: String,conn: &mut PgConnection) -> Result<Vec<Appointments>, crate::errors::ServiceError> {
+fn query_appointments(id_user: String,conn: &mut PgConnection) -> Result<Vec<Appointments>, crate::errors::ServiceError> {
     use crate::schema::appointments::dsl::*;
+    let gym_user_id = query_find_gym_user_id(id_user, conn)?;
     let res =  appointments.select(Appointments::as_select()).filter(gym_id.eq(gym_user_id.clone())).load::<Appointments>(conn)?;
     debug!("appointments found {:?}", res);
+    Ok(res)
+}
+
+fn query_find_gym_user_id(user_selected_id: String, conn: &mut PgConnection) -> Result<String, crate::errors::ServiceError> {
+    use crate::schema::users_gym::dsl::*;
+    let res = users_gym.select(gym_id).filter(user_id.eq(user_selected_id)).limit(1).get_result::<String>(conn)?;
+    debug!("gym_user_id found {:?}", res);
     Ok(res)
 }

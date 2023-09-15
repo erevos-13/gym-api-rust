@@ -3,7 +3,7 @@ use crate::{
     jwt_auth,
     models::{Gym, Pool},
 };
-use actix_web::{post, HttpMessage};
+use actix_web::{post};
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::Utc;
 use diesel::prelude::*;

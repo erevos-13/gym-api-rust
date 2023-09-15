@@ -1,10 +1,8 @@
 use crate::{
-    input_model::gym_input_model::GymRegister,
     jwt_auth,
     models::{Activities, Gym, Pool},
 };
 use actix_web::{get, web, HttpMessage, HttpRequest, HttpResponse};
-use chrono::Utc;
 use diesel::prelude::*;
 
 #[get("/activities")]

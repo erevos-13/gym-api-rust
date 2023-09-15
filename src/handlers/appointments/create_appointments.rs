@@ -5,7 +5,6 @@ use actix_web::{
 };
 use chrono::Utc;
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
-use diesel::pg::Pg;
 
 use crate::{
     input_model::appointment_model::AppointmentsInput,
@@ -13,7 +12,8 @@ use crate::{
     models::{Appointments, Pool, Slots},
 };
 use diesel::SelectableHelper;
-use crate::models::AppointmentsSlots;
+use crate::models::{AppointmentsSlots, UsersGyms};
+
 
 #[post("/appointments")]
 pub async fn create_appointments(
@@ -26,7 +26,6 @@ pub async fn create_appointments(
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
         query_appointments(
-            jwt.user_id.to_string(),
             jwt.user_id.to_string(),
             appointment_input,
             conn,
@@ -96,13 +95,11 @@ fn query_can_book_this_appointment(
     }
 }
 fn query_appointments(
-    jwt_gym_id: String,
     jwt_user_id: String,
     appoint: Json<AppointmentsInput>,
     conn: &mut PgConnection,
 ) -> Result<Appointments, crate::errors::ServiceError> {
     use crate::schema::appointments::dsl::*;
-
     let user_selected_this_appointment = appointments
         .filter(slot_id.eq(appoint.slot_id.clone()))
         .filter(user_id.eq(jwt_user_id.clone()))
@@ -115,11 +112,11 @@ fn query_appointments(
         ));
     }
     query_can_book_this_appointment(appoint.slot_id.clone(), conn)?;
-
+    let gym_id_user = query_get_gym_from_user(jwt_user_id.clone(), conn)?;
     let new_appointment = Appointments {
         id: uuid::Uuid::new_v4().to_string(),
         slot_id: appoint.slot_id.clone(),
-        gym_id: jwt_gym_id,
+        gym_id: gym_id_user.clone(),
         user_id: jwt_user_id,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
@@ -144,4 +141,14 @@ fn query_set_slot_appointments(id_slot: String, id_appointment:String, conn: &mu
         .values(&new_appointment_slot)
         .execute(conn)?;
     Ok(new_appointment_slot)
+}
+
+fn query_get_gym_from_user(id_user: String , conn: &mut PgConnection) -> Result<String, crate::errors::ServiceError> {
+    use crate::schema::users_gym::dsl::*;
+    let res = users_gym
+        .select(UsersGyms::as_select())
+        .filter(user_id.eq(id_user))
+        .limit(1)
+        .get_result::<UsersGyms>(conn)?;
+    Ok(res.gym_id)
 }

@@ -1,18 +1,12 @@
-use core::fmt;
 use std::{
     future::{ready, Ready},
-    io::empty,
 };
 
 use crate::{
-    errors::ServiceError,
-    models::{PasswordUsers, Pool, User},
-    token::{self, signing},
+    token::{self},
 };
-use actix_web::error::ErrorUnauthorized;
-use actix_web::{dev::Payload, Error as ActixWebError};
-use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
-use jsonwebtoken::{decode, DecodingKey, Validation};
+use actix_web::{dev::Payload};
+use actix_web::{FromRequest, HttpMessage, HttpRequest};
 
 #[derive(Debug)]
 pub struct JwtMiddleware {

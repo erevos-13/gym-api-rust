@@ -1,12 +1,12 @@
 use crate::{
-    input_model::{activities_models::ActivityInput, gym_input_model::GymRegister},
+    input_model::{activities_models::ActivityInput},
     jwt_auth,
-    models::{Activities, Gym, Pool},
-    schema::activities::{self, *},
+    models::{Activities, Pool},
+    schema::activities::*,
 };
-use actix_web::{patch, HttpMessage};
+use actix_web::{patch};
 use actix_web::{web, HttpRequest, HttpResponse};
-use diesel::{associations::HasTable, insert_into, prelude::*, update};
+use diesel:: prelude::*;
 
 #[patch("/activities/{activity_id}")]
 pub async fn update_activity(

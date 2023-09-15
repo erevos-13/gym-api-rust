@@ -1,11 +1,9 @@
 use actix_web::{get, HttpRequest, HttpResponse, web};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl, SelectableHelper};
 use crate::jwt_auth;
-use crate::models::{Appointments, Pool, Slots, User};
+use crate::models::{Appointments, Pool, User};
 use crate::schema::appointments::dsl::appointments;
 use diesel::prelude::*;
-use crate::schema::slots::dsl::slots;
-use diesel::associations::HasTable;
 
 #[get("/appointments/my")]
 pub async fn get_appointments_by_user( req: HttpRequest,
@@ -28,11 +26,8 @@ pub async fn get_appointments_by_user( req: HttpRequest,
 }
 
 fn query_appointments(app_gym_id: String,app_user_id: String,conn: &mut PgConnection) -> Result<Vec<Appointments>,crate::errors::ServiceError> {
-    use crate::schema::appointments::dsl::*;
-    use crate::schema::slots::dsl::*;
     let get_user = get_user(app_user_id.clone(), conn)?;
     let res = Appointments::belonging_to(&get_user).load::<Appointments>(conn)?;
-    // let res = appointments.select(Appointments::as_select()).filter(gym_id.eq(app_gym_id)).filter(user_id.eq(app_user_id)).get_results(conn)?;
     debug!("appointments found {:?}, slots:", res);
 
 

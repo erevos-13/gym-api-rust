@@ -1,11 +1,10 @@
 use crate::{
-    input_model::gym_input_model::{GymRegister, ResponseDTO},
+    input_model::gym_input_model::{ ResponseDTO},
     jwt_auth,
     models::{Gym, Pool},
 };
 use actix_web::{get, HttpMessage};
 use actix_web::{web, HttpRequest, HttpResponse};
-use chrono::Utc;
 use diesel::prelude::*;
 
 #[get("/gym")]
@@ -45,7 +44,6 @@ fn query(
 
     let gyms_found = gym
         .select(gym::all_columns())
-        .filter(user_id.eq(&_id.to_string()))
         .load::<Gym>(conn);
     info!("Gyms found: {:?}", gyms_found);
     match gyms_found {

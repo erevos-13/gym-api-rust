@@ -1,11 +1,9 @@
 use crate::{
-    input_model::gym_input_model::GymRegister,
-    jwt_auth,
+
     models::{Gym, Pool},
 };
-use actix_web::{delete, post, HttpMessage};
-use actix_web::{web, HttpRequest, HttpResponse};
-use chrono::Utc;
+use actix_web::{delete};
+use actix_web::{web, HttpResponse};
 use diesel::prelude::*;
 
 #[delete("/gym/{id}")]

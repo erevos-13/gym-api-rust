@@ -1,12 +1,10 @@
 use crate::{
-    errors::ServiceError,
-    models::{Gym, PasswordUsers, Pool, User},
-    schema::gym,
+    models::{PasswordUsers, Pool, User},
     token::signing,
 };
 use actix_web::{web, HttpResponse};
 use diesel::{dsl::exists, prelude::*, select};
-use pwhash::{bcrypt, unix};
+use pwhash::{ unix};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -73,12 +71,12 @@ pub async fn login_user(
         query_login(login_input, conn)
     })
     .await?;
-    match result {
+    return match result {
         Ok(token) => {
             let token_response = TokenResponse { token };
-            return Ok(HttpResponse::Ok().json(token_response));
+            Ok(HttpResponse::Ok().json(token_response))
         }
-        Err(e) => return Err(actix_web::error::ErrorBadRequest(e)),
+        Err(e) => Err(actix_web::error::ErrorBadRequest(e)),
     };
 }
 

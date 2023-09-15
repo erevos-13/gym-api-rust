@@ -1,12 +1,10 @@
 use core::fmt;
 
 use chrono::Utc;
-use hmac::{Hmac, Mac};
-use jsonwebtoken::errors::ErrorKind;
-use jsonwebtoken::{decode_header, TokenData};
+use jsonwebtoken::{ TokenData};
 
 use jsonwebtoken::{
-    decode, encode, errors::Error, Algorithm, DecodingKey, EncodingKey, Header, Validation,
+    decode, encode, DecodingKey, EncodingKey, Header, Validation,
 };
 use serde::{Deserialize, Serialize};
 const TOP_SECRET: &[u8] = b"68a43845-7980-4301-abe5-1df0cee9ef92";

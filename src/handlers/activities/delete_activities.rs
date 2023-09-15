@@ -1,15 +1,13 @@
 use crate::{
-    input_model::{activities_models::ActivityInput, gym_input_model::GymRegister},
     jwt_auth,
-    models::{Activities, Gym, Pool},
+    models::{Activities, Pool},
     schema::{
-        activities::{self, *},
-        gym::*,
+        activities::*,
     },
 };
-use actix_web::{delete, patch, HttpMessage};
+use actix_web::{delete};
 use actix_web::{web, HttpRequest, HttpResponse};
-use diesel::{associations::HasTable, delete, insert_into, prelude::*, update};
+use diesel::{ delete, prelude::*};
 
 #[delete("/activities/{activity_id}")]
 pub async fn delete_activity(
