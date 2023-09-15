@@ -4,7 +4,6 @@ CREATE TABLE gym (
     name TEXT NOT NULL,
     address TEXT NOT NULL,
     postal_code INT NOT NULL,
-    user_id VARCHAR(255) REFERENCES users(id) UNIQUE NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP NOT NULL
 )

@@ -15,7 +15,7 @@ pub async fn get_appointments(
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
         query_appointments(
-            jwt.gym_id.to_string(),
+            jwt.user_id.to_string(),
             jwt.user_id.to_string(),
             conn,
         )

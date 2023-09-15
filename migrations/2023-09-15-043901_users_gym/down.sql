@@ -1,2 +1,2 @@
 -- This file should undo anything in `up.sql`
-DROP TABLE TestMe;
+drop table users_gym;

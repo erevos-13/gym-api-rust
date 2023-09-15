@@ -5,6 +5,7 @@ use crate::models::{Appointments, Pool, Slots, User};
 use crate::schema::appointments::dsl::appointments;
 use diesel::prelude::*;
 use crate::schema::slots::dsl::slots;
+use diesel::associations::HasTable;
 
 #[get("/appointments/my")]
 pub async fn get_appointments_by_user( req: HttpRequest,
@@ -14,7 +15,7 @@ pub async fn get_appointments_by_user( req: HttpRequest,
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
         query_appointments(
-            jwt.gym_id.to_string(),
+            jwt.user_id.to_string(),
             jwt.user_id.to_string(),
             conn,
         )
@@ -28,6 +29,7 @@ pub async fn get_appointments_by_user( req: HttpRequest,
 
 fn query_appointments(app_gym_id: String,app_user_id: String,conn: &mut PgConnection) -> Result<Vec<Appointments>,crate::errors::ServiceError> {
     use crate::schema::appointments::dsl::*;
+    use crate::schema::slots::dsl::*;
     let get_user = get_user(app_user_id.clone(), conn)?;
     let res = Appointments::belonging_to(&get_user).load::<Appointments>(conn)?;
     // let res = appointments.select(Appointments::as_select()).filter(gym_id.eq(app_gym_id)).filter(user_id.eq(app_user_id)).get_results(conn)?;
@@ -36,6 +38,12 @@ fn query_appointments(app_gym_id: String,app_user_id: String,conn: &mut PgConnec
 
     Ok(res)
 }
+fn get_slots(app_gym_id: String,app_user_id: String,conn: &mut PgConnection) -> Result<Vec<String>, crate::errors::ServiceError> {
+    use crate::schema::appointments::dsl::*;
+    let res = appointments.select(id).filter(gym_id.eq(app_gym_id)).filter(user_id.eq(app_user_id)).get_results::<String>(conn)?;
+    Ok(res)
+}
+
 
 fn get_user(app_user_id: String, conn: &mut PgConnection) -> Result<User, crate::errors::ServiceError> {
     use crate::schema::users::dsl::*;

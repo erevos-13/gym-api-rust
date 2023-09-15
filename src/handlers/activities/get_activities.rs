@@ -50,9 +50,9 @@ fn query_get_gym_by_user(
     conn: &mut PgConnection,
 ) -> Result<String, crate::errors::ServiceError> {
     use crate::schema::gym::dsl::*;
+    // TODO change to query_get_gym_by_user and add the user_gym
     let gym_found = gym
         .select(gym::all_columns())
-        .filter(user_id.eq(&user_has_id))
         .load::<Gym>(conn)?;
     debug!("gym_found: {:?}", gym_found);
     if gym_found.len() == 0 {

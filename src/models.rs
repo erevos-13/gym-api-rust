@@ -53,7 +53,6 @@ pub struct PasswordUsers {
     Clone,
     Deserialize,
 )]
-#[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = gym)]
 pub struct Gym {
     #[diesel(sql_type = Text)]
@@ -63,8 +62,6 @@ pub struct Gym {
     #[diesel(sql_type = Text)]
     pub address: String,
     pub postal_code: i32,
-    #[diesel(sql_type = Text)]
-    pub user_id: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
@@ -117,6 +114,7 @@ pub struct Slots {
 #[diesel(table_name = appointments)]
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(belongs_to(Slots, foreign_key = slot_id))]
+#[diesel(primary_key(user_id, gym_id, slot_id))]
 pub struct Appointments {
     pub id: String,
     pub slot_id: String,
@@ -124,4 +122,29 @@ pub struct Appointments {
     pub user_id: String,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize, PartialEq,Associations)]
+#[diesel(table_name = appointments_slots)]
+#[diesel(belongs_to(Slots, foreign_key = slot_id))]
+#[diesel(belongs_to(Appointments, foreign_key = appointment_id))]
+#[diesel(primary_key(appointment_id, slot_id))]
+pub struct AppointmentsSlots{
+    pub slot_id: String,
+    pub appointment_id: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime
+}
+
+
+#[derive(Debug, Insertable, Queryable, Serialize, Selectable, Identifiable, Clone, Deserialize, PartialEq,Associations)]
+#[diesel(table_name = appointments_slots)]
+#[diesel(belongs_to(Gym, foreign_key = gym_id))]
+#[diesel(belongs_to(User, foreign_key = user_id))]
+#[diesel(primary_key(user_id, gym_id))]
+pub struct UsersGyms{
+    user_id: String,
+    gym_id: String,
+    created_at: chrono::NaiveDateTime,
+    updated_at: chrono::NaiveDateTime
 }

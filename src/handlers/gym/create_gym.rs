@@ -14,15 +14,12 @@ pub async fn create_gym(
     pool: web::Data<Pool>,
     _: jwt_auth::JwtMiddleware,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let ext = req.extensions();
-    let user_id = ext.get::<uuid::Uuid>().unwrap();
     let uuid = uuid::Uuid::new_v4();
     let gym_new = Gym {
         id: uuid.to_string(),
         name: gym_register.name.clone(),
         address: gym_register.address.clone(),
         postal_code: gym_register.postal_code.clone(),
-        user_id: user_id.to_string(),
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
     };

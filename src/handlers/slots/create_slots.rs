@@ -8,6 +8,9 @@ use actix_web::{post, web, HttpMessage, HttpRequest, HttpResponse};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use diesel::PgConnection;
+use crate::models::UsersGyms;
+use crate::schema::password_users::user_id;
+use crate::schema::users_gym::dsl::users_gym;
 
 #[post("/slots")]
 pub async fn create_slots(
@@ -20,7 +23,7 @@ pub async fn create_slots(
     let result = web::block(move || {
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
-        query(slots.clone(), jwt.gym_id.to_string(), conn)
+        query(slots.clone(), jwt.user_id.to_string(), conn)
     })
     .await
     .map_err(actix_web::error::ErrorInternalServerError)?;
@@ -33,7 +36,7 @@ pub async fn create_slots(
 
 fn query(
     slot: Vec<SlotsInput>,
-    gym_user_id: String,
+    id_user: String,
     conn: &mut PgConnection,
 ) -> Result<Slots, crate::errors::ServiceError> {
     use crate::schema::slots::dsl::*;
@@ -43,6 +46,7 @@ fn query(
         "Start Time Convert: {:?}, End time convert: {:?}",
         start_date_vec, end_date_vec
     );
+    let gym_user_id = query_find_gym_user_id(id_user, conn)?;
     let exist = slots
         .select(slots::all_columns())
         .filter(start_time.eq_any(&start_date_vec))
@@ -59,6 +63,7 @@ fn query(
             exist[0].start_time, exist[0].end_time
         )));
     }
+
     let slots_vec = create_slot_from_array(slot, gym_user_id);
     let res = diesel::insert_into(slots)
         .values(&slots_vec)
@@ -101,4 +106,14 @@ fn get_end_time_date(slots: &Vec<SlotsInput>) -> Vec<NaiveDateTime> {
         end_date_vec.push(end_time_convert);
     }
     end_date_vec
+}
+
+fn query_find_gym_user_id(id_user:String, conn: &mut PgConnection) -> Result<String,crate::errors::ServiceError>{
+    use crate::schema::users_gym::dsl::*;
+    let res = users_gym
+        .select(gym_id)
+        .filter(user_id.eq(id_user))
+        .limit(1)
+        .get_result::<String>(conn)?;
+    Ok(res)
 }

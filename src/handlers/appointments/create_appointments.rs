@@ -5,6 +5,7 @@ use actix_web::{
 };
 use chrono::Utc;
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::pg::Pg;
 
 use crate::{
     input_model::appointment_model::AppointmentsInput,
@@ -12,6 +13,7 @@ use crate::{
     models::{Appointments, Pool, Slots},
 };
 use diesel::SelectableHelper;
+use crate::models::AppointmentsSlots;
 
 #[post("/appointments")]
 pub async fn create_appointments(
@@ -24,7 +26,7 @@ pub async fn create_appointments(
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
         query_appointments(
-            jwt.gym_id.to_string(),
+            jwt.user_id.to_string(),
             jwt.user_id.to_string(),
             appointment_input,
             conn,
@@ -126,5 +128,20 @@ fn query_appointments(
         .values(&new_appointment)
         .get_result(conn)?;
     query_find_and_remove_attendant_slot(appoint.slot_id.clone(), conn)?;
+    query_set_slot_appointments(appoint.slot_id.clone(), new_appointment.id.clone(), conn)?;
     Ok(res)
+}
+
+fn query_set_slot_appointments(id_slot: String, id_appointment:String, conn: &mut PgConnection) -> Result<AppointmentsSlots, crate::errors::ServiceError>{
+    use crate::schema::appointments_slots::dsl::*;
+    let new_appointment_slot = AppointmentsSlots {
+        slot_id: id_slot,
+        appointment_id: id_appointment,
+        created_at: Utc::now().naive_utc(),
+        updated_at: Utc::now().naive_utc(),
+    };
+    let res = diesel::insert_into(appointments_slots)
+        .values(&new_appointment_slot)
+        .execute(conn)?;
+    Ok(new_appointment_slot)
 }

@@ -17,7 +17,6 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 #[derive(Debug)]
 pub struct JwtMiddleware {
     pub user_id: uuid::Uuid,
-    pub gym_id: uuid::Uuid,
 }
 
 impl FromRequest for JwtMiddleware {
@@ -38,11 +37,10 @@ impl FromRequest for JwtMiddleware {
         match token_data {
             Ok(token_data) => {
                 let user_id = token_data.claims.sub.parse::<uuid::Uuid>().unwrap();
-                let gym_id = token_data.claims.gym.parse::<uuid::Uuid>().unwrap();
                 req.extensions_mut()
                     .insert::<uuid::Uuid>(user_id.to_owned());
 
-                return ready(Ok(JwtMiddleware { user_id, gym_id }));
+                return ready(Ok(JwtMiddleware { user_id }));
             }
             Err(e) => ready(Err(actix_web::error::ErrorUnauthorized(e))),
         }

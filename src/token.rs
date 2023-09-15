@@ -37,12 +37,11 @@ impl fmt::Display for Role {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
-    pub gym: String,
     pub exp: usize,
     pub role: u8,
 }
 
-pub fn signing(uid: String, gym_id: String) -> Result<String, String> {
+pub fn signing(uid: String) -> Result<String, String> {
     let expiration = Utc::now()
         .checked_add_signed(chrono::Duration::minutes(60))
         .expect("valid timestamp")
@@ -52,7 +51,6 @@ pub fn signing(uid: String, gym_id: String) -> Result<String, String> {
         sub: uid.clone(),
         role: Role::User as u8,
         exp: expiration as usize,
-        gym: gym_id.clone(),
     };
     let token = match encode(
         &Header::default(),
