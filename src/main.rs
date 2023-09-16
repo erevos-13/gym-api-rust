@@ -6,6 +6,7 @@ mod models;
 mod schema;
 mod token;
 mod utils;
+mod DTO;
 
 use actix_cors::Cors;
 use actix_web::{
