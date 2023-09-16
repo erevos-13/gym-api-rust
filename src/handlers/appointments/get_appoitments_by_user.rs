@@ -1,9 +1,10 @@
 use actix_web::{get, HttpRequest, HttpResponse, web};
 use diesel::{PgConnection, QueryDsl, RunQueryDsl, SelectableHelper};
 use crate::jwt_auth;
-use crate::models::{Appointments, Pool, User};
+use crate::models::{Appointments, Pool, Slots, User};
 use crate::schema::appointments::dsl::appointments;
 use diesel::prelude::*;
+use crate::DTO::slots_appotiments_DTO::SlotsAppointmentsDTO;
 
 #[get("/appointments/my")]
 pub async fn get_appointments_by_user( req: HttpRequest,
@@ -13,7 +14,6 @@ pub async fn get_appointments_by_user( req: HttpRequest,
         let conn: &mut r2d2::PooledConnection<diesel::r2d2::ConnectionManager<PgConnection>> =
             &mut pool.get().unwrap();
         query_appointments(
-            jwt.user_id.to_string(),
             jwt.user_id.to_string(),
             conn,
         )
@@ -25,23 +25,26 @@ pub async fn get_appointments_by_user( req: HttpRequest,
     }
 }
 
-fn query_appointments(app_gym_id: String,app_user_id: String,conn: &mut PgConnection) -> Result<Vec<Appointments>,crate::errors::ServiceError> {
-    let get_user = get_user(app_user_id.clone(), conn)?;
-    let res = Appointments::belonging_to(&get_user).load::<Appointments>(conn)?;
-    debug!("appointments found {:?}, slots:", res);
 
 
-    Ok(res)
-}
-fn get_slots(app_gym_id: String,app_user_id: String,conn: &mut PgConnection) -> Result<Vec<String>, crate::errors::ServiceError> {
+fn query_appointments(id_user: String,conn: &mut PgConnection) -> Result<Vec<SlotsAppointmentsDTO>, crate::errors::ServiceError> {
     use crate::schema::appointments::dsl::*;
-    let res = appointments.select(id).filter(gym_id.eq(app_gym_id)).filter(user_id.eq(app_user_id)).get_results::<String>(conn)?;
+
+    let res =  appointments.select(Appointments::as_select()).filter(user_id.eq(id_user)).load::<Appointments>(conn)?;
+    let slots_found = query_found_slots(&res.iter().map(|x| x.slot_id.clone()).collect::<Vec<String>>(),conn)?;
+    let user_appointments_slots_found = query_slots_appointments_belongs_to_user(slots_found, conn)?;
+    Ok(user_appointments_slots_found)
+}
+
+fn query_found_slots(slots_ids: &Vec<String>,conn: &mut PgConnection)-> Result<Vec<Slots>, crate::errors::ServiceError>{
+    use crate::schema::slots::dsl::*;
+    let res = slots.select(Slots::as_select()).filter(id.eq_any(slots_ids)).load(conn)?;
     Ok(res)
 }
 
-
-fn get_user(app_user_id: String, conn: &mut PgConnection) -> Result<User, crate::errors::ServiceError> {
-    use crate::schema::users::dsl::*;
-    let get_user = users.select(User::as_select()).filter(id.eq(app_user_id.clone())).get_result::<User>(conn)?;
-    Ok(get_user)
+fn query_slots_appointments_belongs_to_user(slots: Vec<Slots>, conn: &mut PgConnection) -> Result<Vec<SlotsAppointmentsDTO>, crate::errors::ServiceError>{
+    let appointments_found = Appointments::belonging_to(&slots).select(Appointments::as_select()).load(conn)?;
+    let res = appointments_found.grouped_by(&slots).into_iter().zip(slots).map(|(appointment, slot)| SlotsAppointmentsDTO{ appointments: appointment, slots: slot }).collect::<Vec<SlotsAppointmentsDTO>>();
+    debug!("query_found_slots_by_appointment found {:?}", res);
+    Ok(res)
 }
