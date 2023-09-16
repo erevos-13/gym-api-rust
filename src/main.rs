@@ -76,6 +76,7 @@ async fn main() -> std::io::Result<()> {
                     .service(get_appointments::get_appointments)
                     .service(get_appoitments_by_user::get_appointments_by_user)
                     .service(add_user_in_gym::add_user_in_gym)
+                    .service(get_user::get_user)
             )
             .route("/", web::get().to(HttpResponse::Ok))
     })
